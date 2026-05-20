@@ -1,0 +1,118 @@
+import logging
+from dataclasses import asdict, dataclass, field
+
+from captcha_bot import db
+
+logger = logging.getLogger(__name__)
+
+type UserIdKey = str
+type ChatIdKey = str
+
+
+@dataclass(slots=True)
+class UserRecord:
+    expected: int
+    challenge_message_id: int
+    expires_at: float
+
+
+@dataclass(slots=True)
+class chatRecord:
+    users: dict[UserIdKey, UserEntry] = field(default_factory=dict)
+    failures: dict[UserIdKey, int] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class CaptchaDB:
+    chats: dict[ChatIdKey, chatRecord] = field(default_factory=dict)
+
+
+def get_failures_bucket(chat_id: int, *, create: bool = False) -> dict[str, int] | None:
+    chat_key = str(chat_id)
+    chat = db.data.get(chat_key)
+
+    if chat is None:
+        if not create:
+            return None
+        db.data[chat_key] = {}
+        chat = db.data[chat_key]
+
+    failures = chat.get("failures")
+    if failures is None:
+        if not create:
+            return None
+        chat["failures"] = {}
+        failures = chat["failures"]
+
+    return failures
+
+
+def increment_consecutive_failures(chat_id: int, user_id: int) -> int:
+    failures = get_failures_bucket(chat_id, create=True)
+    assert failures is not None
+
+    user_key = str(user_id)
+    failures[user_key] = int(failures.get(user_key, 0)) + 1
+
+    logger.info(
+        "Incremented consecutive failures to %d for user %d in chat %d",
+        failures[user_key],
+        user_id,
+        chat_id,
+    )
+
+    return failures[user_key]
+
+
+def reset_consecutive_failures(chat_id: int, user_id: int) -> None:
+    failures = get_failures_bucket(chat_id)
+    if failures is None:
+        logger.warning(
+            "cannot reset consecutive failures for user %d in chat %d, failed to get failure bucket",
+            user_id,
+            chat_id,
+        )
+        return
+
+    failures.pop(str(user_id), None)
+
+
+def get_user_record(chat_id: int, user_id: int) -> UserRecord:
+    return UserRecord(**db.data.get(str(chat_id), {}).get(str(user_id)))
+
+
+def save_user_record(chat_id: int, user_id: int, user_record: UserRecord) -> None:
+    chat_key = str(chat_id)
+    user_key = str(user_id)
+
+    if chat_key not in db.data:
+        db.data[chat_key] = {}
+
+    db.data[chat_key][user_key] = asdict(user_record)
+
+    logger.info(
+        "saved captcha record for user %d in chat %d (challenge_message_id=%d, expires_at=%.3f)",
+        user_id,
+        chat_id,
+        user_record.challenge_message_id,
+        user_record.expires_at,
+    )
+
+
+def delete_user_record(chat_id: int, user_id: int) -> None:
+    chat_key = str(chat_id)
+    user_key = str(user_id)
+
+    chat = db.data.get(chat_key)
+    if not chat:
+        return
+
+    chat.pop(user_key, None)
+    if not chat:
+        db.data.pop(chat_key, None)
+
+    logger.info(
+        "deleted captcha record for user %d in chat %d",
+        user_id,
+        chat_id,
+    )

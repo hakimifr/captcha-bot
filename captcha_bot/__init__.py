@@ -1,0 +1,18 @@
+import os
+
+from jsondb.database import JsonDB
+
+from captcha_bot import custom_logger  # noqa: F401
+
+PERSIST_DIR = os.getenv("PERSIST_DIR") or "/persist/storage"
+CHAT_WHITELIST: list[int] = [
+    -1001267207006,  # photography group
+    -1002237651092,  # disc
+    -1001754321934,  # community
+    -1001309495065,  # r6
+]
+TIMEOUT_SECONDS = 60
+TEMP_BAN_SECONDS = 21600
+MAX_FAIL_BEFORE_TEMPBAN = 6
+
+db = JsonDB(__name__, PERSIST_DIR)

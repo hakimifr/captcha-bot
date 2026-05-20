@@ -1,0 +1,37 @@
+line-length = 120
+target-version = "py313" # Adjust to your minimum Python version if needed
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "B",   # bugbear (great for catching common mistakes)
+    "C4",  # comprehensions
+    "UP",  # pyupgrade (keeps code modern)
+    "I",   # isort (import sorting)
+    "N",   # PEP8 naming
+    "S",   # bandit (basic security issues)
+    "BLE", # catch-all except
+    "A",   # shadowed builtins
+    "G",   # do not use f-string for logging and bunch of logging practices
+]
+ignore = [
+    # Usage of assert - we are never running Python with O and we are only
+    # using assert to satisfy linter
+    "S101",
+    "BLE001",  # allow bare exception
+    "S404",    # `subprocess` module is possibly insecure
+]
+fixable = ["ALL"]
+unfixable = []
+
+exclude = [
+    "docs/*"
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

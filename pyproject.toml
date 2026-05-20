@@ -1,0 +1,12 @@
+[project]
+name = "captcha-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "jsondb-hakimifr>=0.3.3",
+    "kurigram>=2.2.22",
+    "tgcrypto>=1.2.5",
+    "uvloop>=0.22.1",
+]
