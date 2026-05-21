@@ -7,6 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "jsondb-hakimifr>=0.3.3",
     "kurigram>=2.2.22",
+    "rich>=15.0.0",
     "tgcrypto>=1.2.5",
     "uvloop>=0.22.1",
 ]
