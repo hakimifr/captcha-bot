@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from pyrogram.client import Client
 from pyrogram.enums import ChatMemberStatus, MessageServiceType
+from pyrogram.sync import idle
 from pyrogram.types.messages_and_media import Message
 
 from captcha_bot import CHAT_WHITELIST, MAX_FAIL_BEFORE_TEMPBAN, TEMP_BAN_SECONDS, TIMEOUT_SECONDS
@@ -257,4 +258,8 @@ async def main():
         api_hash=API_HASH,
         bot_token=BOT_TOKEN,
     )
-    app.run()
+    try:
+        await app.start()
+        await idle()
+    finally:
+        await app.stop()
