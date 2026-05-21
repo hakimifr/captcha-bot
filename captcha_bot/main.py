@@ -81,6 +81,23 @@ async def kicker(app: Client, after: float | int, chat_id: int, user_id: int) ->
             await app.ban_chat_member(chat_id, user_id)
             asyncio.sleep(0.2)
             await app.unban_chat_member(chat_id, user_id)
+
+            await app.send_message(
+                chat_id,
+                (
+                    f"__kicked "
+                    f"[{member.user.full_name}](tg://user?id={user_id}) "
+                    f"for failing to complete the captcha in time.__"
+                ),
+            )
+            logger.info(
+                "Kicked user %d from chat %d due to captcha timeout (consecutive failures=%d)",
+                user_id,
+                chat_id,
+                failures,
+            )
+
+            await app.delete_messages(chat_id, int(captcha_message_id))
     except Exception:
         logger.exception(
             "Failed to kick user %d from chat %d",
