@@ -5,8 +5,10 @@ import random
 import time
 from datetime import datetime, timedelta
 
+from pyrogram import filters
 from pyrogram.client import Client
 from pyrogram.enums import ChatMemberStatus, MessageServiceType
+from pyrogram.handlers.message_handler import MessageHandler
 from pyrogram.sync import idle
 from pyrogram.types.messages_and_media import Message
 
@@ -258,6 +260,10 @@ async def main():
         api_hash=API_HASH,
         bot_token=BOT_TOKEN,
     )
+
+    app.add_handler(MessageHandler(joinhandler, filters.service), group=0)
+    app.add_handler(MessageHandler(verifyhandler, filters.text), group=1)
+
     try:
         await app.start()
         await idle()
