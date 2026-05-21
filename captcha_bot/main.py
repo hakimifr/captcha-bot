@@ -213,6 +213,12 @@ async def verifyhandler(app: Client, message: Message) -> None:
     logger.info("received verification message from user %d in chat %d", user_id, chat_id)
 
     if not message.reply_to_message:
+        if message.text == str(record.expected):
+            await message.reply_text(
+                "__nice try but use your fucking eyes and re-read the prompt. "
+                "can't see the word **reply**, even after it's bold for you? "
+                "try going to an optometrist and get a prescription.__"
+            )
         logger.info(
             "ignoring verification message from user %d in chat %d because it is not a reply",
             user_id,
