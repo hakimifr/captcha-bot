@@ -67,7 +67,12 @@ def reset_consecutive_failures(chat_id: int, user_id: int) -> None:
 
 
 def get_user_record(chat_id: int, user_id: int) -> UserRecord | None:
-    return UserRecord(**db.data.get(str(chat_id), {}).get(str(user_id)))
+    try:
+        user_record = UserRecord(**db.data.get(str(chat_id), {}).get(str(user_id)))
+    except TypeError:
+        user_record = None
+
+    return user_record
 
 
 def save_user_record(chat_id: int, user_id: int, user_record: UserRecord) -> None:
