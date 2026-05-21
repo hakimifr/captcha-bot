@@ -272,7 +272,11 @@ async def main():
             continue
 
         for user_id_str in users:
+            if user_id_str == "failures":
+                continue
+
             user_entry = get_user_record(int(chat_id_str), int(user_id_str))
+            logger.info("restoring pending kicker for chat %s, user %s", chat_id_str, user_id_str)
             if user_entry is None:
                 logger.warning("this isn't supposed to happen! anyway...")
                 continue
