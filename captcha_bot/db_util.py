@@ -66,7 +66,7 @@ def reset_consecutive_failures(chat_id: int, user_id: int) -> None:
     failures.pop(str(user_id), None)
 
 
-def get_user_record(chat_id: int, user_id: int) -> UserRecord:
+def get_user_record(chat_id: int, user_id: int) -> UserRecord | None:
     return UserRecord(**db.data.get(str(chat_id), {}).get(str(user_id)))
 
 

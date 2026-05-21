@@ -12,7 +12,7 @@ from pyrogram.handlers.message_handler import MessageHandler
 from pyrogram.sync import idle
 from pyrogram.types.messages_and_media import Message
 
-from captcha_bot import CHAT_WHITELIST, MAX_FAIL_BEFORE_TEMPBAN, TEMP_BAN_SECONDS, TIMEOUT_SECONDS
+from captcha_bot import CHAT_WHITELIST, MAX_FAIL_BEFORE_TEMPBAN, TEMP_BAN_SECONDS, TIMEOUT_SECONDS, db
 from captcha_bot.db_util import (
     UserRecord,
     delete_user_record,
@@ -260,6 +260,39 @@ async def main():
         api_hash=API_HASH,
         bot_token=BOT_TOKEN,
     )
+
+    loop = asyncio.get_event_loop()
+    scheduled_count = 0
+
+    for chat_id_str, users in db.data.items():
+        if not chat_id_str.lstrip("-").isdigit():
+            continue
+
+        if not isinstance(users, dict):
+            continue
+
+        for user_id_str in users:
+            user_entry = get_user_record(int(chat_id_str), int(user_id_str))
+            if user_entry is None:
+                logger.warning("this isn't supposed to happen! anyway...")
+                continue
+
+            remaining = user_entry.expires_at - time.time()
+
+            if remaining < 0:
+                remaining = 0
+
+            loop.create_task(
+                kicker(
+                    app,
+                    remaining,
+                    int(chat_id_str),
+                    int(user_id_str),
+                )
+            )
+            scheduled_count += 1
+
+    logger.info("restored %d pending kicker tasks", scheduled_count)
 
     app.add_handler(MessageHandler(joinhandler, filters.service), group=0)
     app.add_handler(MessageHandler(verifyhandler, filters.text), group=1)
