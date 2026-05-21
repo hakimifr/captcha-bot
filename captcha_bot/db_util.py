@@ -1,5 +1,5 @@
 import logging
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 
 from captcha_bot import db
 
@@ -14,17 +14,6 @@ class UserRecord:
     expected: int
     challenge_message_id: int
     expires_at: float
-
-
-@dataclass(slots=True)
-class chatRecord:
-    users: dict[UserIdKey, UserEntry] = field(default_factory=dict)
-    failures: dict[UserIdKey, int] = field(default_factory=dict)
-
-
-@dataclass(slots=True)
-class CaptchaDB:
-    chats: dict[ChatIdKey, chatRecord] = field(default_factory=dict)
 
 
 def get_failures_bucket(chat_id: int, *, create: bool = False) -> dict[str, int] | None:
