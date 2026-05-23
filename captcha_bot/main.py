@@ -212,41 +212,18 @@ async def verifyhandler(app: Client, message: Message) -> None:
 
     logger.info("received verification message from user %d in chat %d", user_id, chat_id)
 
-    if not message.reply_to_message:
-        if message.text == str(record.expected):
-            await message.reply_text(
-                "__nice try but use your fucking eyes and re-read the prompt. "
-                "can't see the word **reply**, even after it's bold for you? "
-                "try going to an optometrist and get a prescription.__"
-            )
-        logger.info(
-            "ignoring verification message from user %d in chat %d because it is not a reply",
-            user_id,
-            chat_id,
-        )
-        return
-
-    if message.reply_to_message.id != record.challenge_message_id:
-        logger.info(
-            "ignoring verification message from user %d in chat %d because reply message id %d does not match challenge id %d",  # noqa: E501
-            user_id,
-            chat_id,
-            message.reply_to_message.id,
-            record.challenge_message_id,
-        )
-        return
-
     if message.text.strip() != str(record.expected):
-        await message.reply("__wrong code.__")
-        logger.info(
-            "user %d submitted wrong captcha in chat %d; retries allowed and consecutive failures unchanged",
-            user_id,
-            chat_id,
-        )
-        return
+        if message.reply_to_message and message.reply_to_message.id == record.challenge_message_id:
+            await message.reply("__wrong code.__")
+            logger.info(
+                "user %d submitted wrong captcha in chat %d; retries allowed and consecutive failures unchanged",
+                user_id,
+                chat_id,
+            )
+            return
 
     await message.reply("__Verification successful. Welcome!__")
-    await message.reply_to_message.delete()
+    await app.delete_messages(chat_id, record.challenge_message_id)
     logger.info("User %d solved captcha in chat %d", user_id, chat_id)
 
     reset_consecutive_failures(chat_id, user_id)
