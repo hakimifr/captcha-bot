@@ -220,7 +220,7 @@ async def verifyhandler(app: Client, message: Message) -> None:
                 user_id,
                 chat_id,
             )
-            return
+        return
 
     await message.reply("__Verification successful. Welcome!__")
     await app.delete_messages(chat_id, record.challenge_message_id)
