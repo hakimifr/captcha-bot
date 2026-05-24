@@ -25,7 +25,7 @@ class CalleeInfo:
     lineno: int
 
 
-class Logger:
+class CustomLogger:
     def __init__(self) -> None:
         self.thread = threading.Thread(target=self.run_loop, daemon=True)
         self.queue = queue.Queue()
@@ -79,6 +79,8 @@ class Logger:
                         self.console.print(msg)
                         f.write(Text.from_markup(msg).plain + "\n")
                         f.flush()
+                    else:
+                        lg.warning("unexpected log_data type: %s", type(log_data))
                 finally:
                     self.queue.task_done()
 
@@ -91,11 +93,15 @@ class Logger:
 
         root.addHandler(queue_handler)
 
+    def shutdown_logger(self) -> None:
+        self.queue.put(None)
+        self.thread.join()
 
-logger = Logger()
+
+logger = CustomLogger()
 logger.setup_redirect()
 
 
 # ruff: disable[N802]
-def getLogger(*args) -> Logger:
+def get_custom_logger(*args) -> CustomLogger:
     return logger
