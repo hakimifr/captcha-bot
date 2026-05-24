@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Firdaus Hakimi <hakimifirdaus944@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 from dataclasses import asdict, dataclass
 
