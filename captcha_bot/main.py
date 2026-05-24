@@ -225,7 +225,7 @@ async def verifyhandler(app: Client, message: Message) -> None:
             )
         return
 
-    await message.reply("__Verification successful. Welcome!__")
+    await message.reply("__Verification successful. Welcome! Make sure you read the group's rule sent by Rose.__")
     await app.delete_messages(chat_id, record.challenge_message_id)
     logger.info("User %d solved captcha in chat %d", user_id, chat_id)
 
